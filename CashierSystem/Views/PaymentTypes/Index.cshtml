@@ -1,0 +1,43 @@
+﻿@model IEnumerable<CashierSystem.Models.PaymentType>
+
+@{
+    ViewData["Title"] = "Payment Type";
+}
+
+<h1 class="pb-3 text-center">Payment Type</h1>
+
+<p class="pb-2">
+    <a class="btn btn-success" asp-action="Create">Create New</a>
+</p>
+<div class="mt-2 table-responsive">
+    <table class="table-hover table align-middle">
+        <thead class="table-danger">
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.TypeName)
+                </th>
+                <th>Edit</th>
+                <th>Details</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+    @foreach (var item in Model) {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TypeName)
+                </td>
+                <td>
+                    <a Class="btn btn-dark" asp-action="Edit" asp-route-id="@item.PaymentTypeId">Edit</a> 
+                </td>
+                <td>
+                    <a Class="btn btn-warning" asp-action="Details" asp-route-id="@item.PaymentTypeId">Details</a> 
+                </td>
+                <td>
+                    <a Class="btn btn-danger" asp-action="Delete" asp-route-id="@item.PaymentTypeId">Delete</a>
+                </td>
+            </tr>
+    }
+        </tbody>
+    </table>
+</div>

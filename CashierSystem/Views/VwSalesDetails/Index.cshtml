@@ -1,0 +1,40 @@
+﻿@model IEnumerable<CashierSystem.Models.VwSalesDetail>
+@{
+    ViewData["Title"] = "Sales Detail";
+}
+
+<h1 class="text-center pb-4">Sales Detail</h1>
+
+<div class="table-responsive">
+    <table class="table mt-2 table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.SaleDate)</th>
+                <th>@Html.DisplayNameFor(model => model.CustomerName)</th>
+                <th>@Html.DisplayNameFor(model => model.ProductName)</th>
+                <th>@Html.DisplayNameFor(model => model.Quantity)</th>
+                <th>@Html.DisplayNameFor(model => model.UnitPrice)</th>
+                <th>@Html.DisplayNameFor(model => model.LineTotal)</th>
+                <th>@Html.DisplayNameFor(model => model.TotalAmount)</th>
+                <th>@Html.DisplayNameFor(model => model.Discount)</th>
+                <th>@Html.DisplayNameFor(model => model.NetAmount)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var item in Model)
+            {   
+                <tr>
+                    <td>@Html.DisplayFor(modelitem => item.SaleDate)</td>
+                    <td>@Html.DisplayFor(modelitem => item.CustomerName)</td>
+                    <td>@Html.DisplayFor(modelitem => item.ProductName)</td>
+                    <td>@Html.DisplayFor(modelitem => item.Quantity)</td>
+                    <td>@Html.DisplayFor(modelitem => item.UnitPrice)</td>
+                    <td>@Html.DisplayFor(modelitem => item.LineTotal)</td>
+                    <td>@Html.DisplayFor(modelitem => item.TotalAmount)</td>
+                    <td>@Html.DisplayFor(modelitem => item.Discount)</td>
+                    <td>@Html.DisplayFor(modelitem => item.NetAmount)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
