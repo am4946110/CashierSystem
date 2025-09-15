@@ -53,13 +53,13 @@
                     @Html.DisplayFor(modelItem => item.DateBecameCustomer)
                 </td>
                 <td>
-                    <a class="btn btn-dark" asp-action="Edit" asp-route-id="@item.CustomerId">Edit</a> 
+                    <a class="btn btn-dark" asp-action="Edit" asp-route-id="@item.Id">Edit</a> 
                 </td>
                 <td>
-                    <a class="btn btn-warning" asp-action="Details" asp-route-id="@item.CustomerId">Details</a>
+                    <a class="btn btn-warning" asp-action="Details" asp-route-id="@item.Id">Details</a>
                 </td>
                 <td>
-                    <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.CustomerId">Delete</a>
+                    <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
                 </td>
             </tr>
     }

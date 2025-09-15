@@ -13,49 +13,79 @@ namespace CashierSystem.Controllers
     {
         private readonly CashierSystemContext _context;
 
-        public SuppliersController(CashierSystemContext context)
+        private readonly ICustomKeyManager _keyManager;
+
+        public SuppliersController(CashierSystemContext context, ICustomKeyManager keyManager)
         {
             _context = context;
+            _keyManager = keyManager;
         }
 
-        // GET: Suppliers
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Suppliers.ToListAsync());
+            var sh = await _context.Suppliers.ToListAsync();
+
+            var k = sh.Select(s =>
+            {
+                s.Id = _keyManager.Protect(s.SupplierId.ToString());
+
+                return s;
+            
+            }).ToList();
+
+            return View(k);
         }
 
-        // GET: Suppliers/Details/5
-        public async Task<IActionResult> Details(Guid? id)
+        [HttpGet]
+        public async Task<IActionResult> Details(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            var supplier = await _context.Suppliers
-                .FirstOrDefaultAsync(m => m.SupplierId == id);
-            if (supplier == null)
+            try
             {
-                return NotFound();
-            }
+                var kk = Guid.Parse(_keyManager.Unprotect(id));
 
-            return View(supplier);
+                var supplier = await _context.Suppliers
+                    .FirstOrDefaultAsync(m => m.SupplierId == kk);
+
+                if (supplier == null)
+                {
+                    return NotFound();
+                }
+
+                var sh = await _context.Suppliers.ToListAsync();
+
+                var k = sh.Select(s =>
+                {
+                    s.Id = _keyManager.Protect(s.SupplierId.ToString());
+
+                    return s;
+
+                }).ToList();
+
+                return View(supplier);
+            }
+            catch (Exception ex) 
+            {
+                return NotFound(ex.Message);
+            }
         }
 
-        // GET: Suppliers/Create
+        [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Suppliers/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("SupplierId,SupplierName,Phone,Email,Address")] Supplier supplier)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 supplier.SupplierId = Guid.NewGuid();
                 _context.Add(supplier);
@@ -65,40 +95,51 @@ namespace CashierSystem.Controllers
             return View(supplier);
         }
 
-        // GET: Suppliers/Edit/5
-        public async Task<IActionResult> Edit(Guid? id)
+        [HttpGet]
+        public async Task<IActionResult> Edit(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            var supplier = await _context.Suppliers.FindAsync(id);
-            if (supplier == null)
+            try
+            {
+                var k = Guid.Parse(_keyManager.Unprotect(id));
+
+                var supplier = await _context.Suppliers.FindAsync(k);
+
+                if (supplier == null)
+                {
+                    return NotFound();
+                }
+
+                return View(supplier);
+            }
+            catch (Exception)
             {
                 return NotFound();
             }
-            return View(supplier);
         }
 
-        // POST: Suppliers/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("SupplierId,SupplierName,Phone,Email,Address")] Supplier supplier)
+        public async Task<IActionResult> Edit(string id, [Bind("SupplierId,SupplierName,Phone,Email,Address")] Supplier supplier)
         {
-            if (id != supplier.SupplierId)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 try
                 {
                     _context.Update(supplier);
+                    
                     await _context.SaveChangesAsync();
+                   
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -111,42 +152,62 @@ namespace CashierSystem.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
+            
             return View(supplier);
         }
 
-        // GET: Suppliers/Delete/5
-        public async Task<IActionResult> Delete(Guid? id)
+        [HttpGet]
+        public async Task<IActionResult> Delete(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            var supplier = await _context.Suppliers
-                .FirstOrDefaultAsync(m => m.SupplierId == id);
-            if (supplier == null)
+            try
+            {
+                var k = Guid.Parse(_keyManager.Unprotect(id));
+
+                var supplier = await _context.Suppliers
+                    .FirstOrDefaultAsync(m => m.SupplierId == k);
+
+                if (supplier == null)
+                {
+                    return NotFound();
+                }
+
+                return View(supplier);
+            }
+            catch (Exception) 
             {
                 return NotFound();
             }
-
-            return View(supplier);
         }
 
-        // POST: Suppliers/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var supplier = await _context.Suppliers.FindAsync(id);
-            if (supplier != null)
+            try
             {
-                _context.Suppliers.Remove(supplier);
-            }
+                var k = Guid.Parse(_keyManager.Unprotect(id));
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+                var supplier = await _context.Suppliers.FindAsync(id);
+
+                if (supplier != null)
+                {
+                    _context.Suppliers.Remove(supplier);
+
+                    await _context.SaveChangesAsync();
+                }
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception) 
+            {
+                return NotFound();
+            }
         }
 
         private bool SupplierExists(Guid id)

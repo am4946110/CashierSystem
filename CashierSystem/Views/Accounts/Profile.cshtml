@@ -1,0 +1,179 @@
+﻿@model MyUser
+
+@{
+    ViewData["Title"] = "Profile " + User.Identity.Name;
+}
+
+<div class="container">
+    <div style="position: fixed;display: flex;align-items: center;text-align: center;inset: 0;" id="splash-screen">
+        <button class="btn btn-primary">
+            <span class="spinner-border spinner-border-sm"></span>
+            Loading..
+        </button>
+    </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const splash = document.getElementById("splash-screen");
+    const logoText = document.getElementById("logo-text");
+
+    // تأثير وميض للنص
+    let opacity = 1;
+    let fadeOut = false;
+    setInterval(() => {
+        if (fadeOut) {
+            opacity -= 0.05;
+            if (opacity <= 0.3) fadeOut = false;
+        } else {
+            opacity += 0.05;
+            if (opacity >= 1) fadeOut = true;
+        }
+        logoText.setAttribute("fill-opacity", opacity.toString());
+    }, 100);
+
+    // إخفاء السبلش بعد 3 ثواني
+    setTimeout(() => {
+        splash.style.transition = "opacity 1s ease";
+        splash.style.opacity = "0";
+        setTimeout(() => {
+            splash.style.display = "none";
+        }, 1000);
+    }, 3000);
+});
+</script>
+
+<style>
+/* تنسيقات للسplash */
+#splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+        background: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+</style>
+<div class="card">
+    <div class="card shadow-lg border-0 rounded-4 my-4">
+        <div class="card-header bg-primary text-white rounded-top-4">
+            <div class="container-md">
+                <div class="row align-items-center">
+                    <div class="col-2 text-center">
+                        @if (Model.ImagePath != null && Model.ImagePath.Length > 0)
+                        {
+                            <img src="data:image/jpeg;base64,@Convert.ToBase64String(Model.ImagePath)"
+                                 class="rounded-circle border border-3 border-light shadow custom-img"
+                                 style="width:80px;height:80px;object-fit:cover;" />
+                        }
+                        else
+                        {
+                            <i class="fa-solid fa-user-circle fa-4x text-light"></i>
+                        }
+                    </div>
+                    <div class="col-lg-6">
+                        <h5 class="mb-3">
+                            <i class="fa-solid fa-envelope me-2"></i> E-mail:
+                            <a class="btn btn-light btn-sm ms-2" href="mailto:@Model.Email">
+                                @User.Identity.Name
+                            </a>
+                        </h5>
+                        <h5>
+                            <i class="fa-solid fa-phone me-2"></i> Phone:
+                            <a class="btn btn-light btn-sm ms-2" href="tel:@(Model.PhoneNumber ?? "Unavailable")">
+                                @(Model.PhoneNumber ?? "Unavailable")
+                            </a>
+                        </h5>
+                    </div>
+                    <div class="col-lg-4">
+                        <h5 class="mb-3">
+                            <i class="fa-solid fa-briefcase me-2"></i> Job Position:
+                            @foreach (var role in User.Claims.Where(c => c.Type == System.Security.Claims.ClaimTypes.Role))
+                            {
+                                <span class="badge bg-warning text-dark ms-1">@role.Value</span>
+                            }
+                        </h5>
+                        <h5>
+                            <i class="fa-solid fa-calendar me-2"></i> Birth Date:
+                            <span class="badge bg-light text-dark">
+                                @(Model.BirthDate.HasValue? Model.BirthDate.Value.ToString("yyyy-MM-dd") : "Unavailable")
+                            </span>
+                        </h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div>
+            <div class="row">
+                <div class="col-lg-3">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <div class="list-group">
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a class="list-group-item list-group-item-action" asp-controller="ManageRoles" asp-action="Index">Role Management</a>
+                                <a class="list-group-item list-group-item-action" asp-controller="Accounts" asp-action="Index">Accounts Management</a>
+                            }
+
+                            <a asp-action="EditPassword" asp-controller="Accounts" asp-route-email="@Model.Email" asp-route-id="@Model.usersId" class="list-group-item list-group-item-action">Password</a>
+                            <a asp-action="Edit" asp-controller="Accounts" asp-route-email="@Model.Email" asp-route-id="@ViewData["EncryptedId"]" class="list-group-item list-group-item-action">Edit</a>
+                            <a class="list-group-item list-group-item-action" asp-controller="Accounts" asp-action="Logout">Logout</a>
+                        </div>
+
+                        @if (ViewData["SuccessMessage"] != null)
+                        {
+                            <div class="alert alert-success">@ViewData["SuccessMessage"]</div>
+                        }
+                    }
+                </div>
+                <div  class="col-lg-8">
+                    <p class="h1 text-center fw-bold">Organizational</p>
+                    <div id="leav-section"></div>
+                    <div id="att-screen"></div>
+                    <div id="le-screen"></div>
+                    <p class="h1 text-center fw-bold">Finance</p>
+                    <div id="bap-section"></div>
+                    <div id="sal-section"></div>
+                    <p class="h1 text-center fw-bold">Administrative</p>
+                    <div id="dep-screen"></div>
+                    <div id="Depr-Depr"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+<script>
+    $(function () {    
+        $("#bap-section").load("/report/BAP");
+    });
+    $(function () {        
+        $("#sal-section").load("/report/Sal");
+    });
+    $(function () {        
+        $("#leav-section").load("/report/Leave");
+    });
+    $(function () {        
+        $("#att-screen").load("/report/Emp");
+    });
+    $(function () {        
+        $("#dep-screen").load("/report/Dep");
+    });
+    $(function () 
+    {
+        $("#le-screen").load("/report/tle");
+    });
+    $(function () 
+    {             
+        $("#Depr-Depr").load("/report/Depr");
+    })
+</script>
+}
+                        

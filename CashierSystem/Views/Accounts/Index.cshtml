@@ -1,0 +1,118 @@
+﻿@model IEnumerable<MyUser>
+
+@{
+    ViewData["Title"] = "User";
+}
+
+<h1 class="text-center mt-3  pb-3">User</h1>
+
+<p class="pb-3">
+    <a class="btn  btn-outline-primary" asp-action="Register">Create New</a>
+    <a class="btn  btn-outline-primary" asp-controller="Device" asp-action="index">Device</a>
+    <a class="btn  btn-outline-primary" asp-controller="Device" asp-action="DeviceInfo">DeviceInfo</a>
+    <a class="btn  btn-outline-primary" asp-controller="Device" asp-action="ActivityLog">Activity Log</a>
+
+</p>
+<div class="table-responsive">
+    <table id="tableId" class="table pb-3 text-center table-hover  align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.UserName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Email)
+                </th>
+                <th>Edit</th>
+                <th>Delete</th>
+                <th>Password</th>
+                <th>Role</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.UserName)
+                    </td>
+                    <td>
+                        <a class="btn" href="mailto:@item.Email">@Html.DisplayFor(modelItem => item.Email)</a>
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-email="@item.Email" asp-route-id="@item.usersId" class="btn btn-outline-warning">Edit</a>
+                    </td>
+                     <td>
+                        <a asp-action="Delete" asp-route-id="@item.usersId" class="btn btn-outline-danger">Delete</a>
+                    </td>
+                    <td>
+                        <a asp-action="EditPassword" asp-route-id="@item.usersId" class="btn btn-outline-warning">Password</a>
+                    </td>
+                    <td>
+                        <a asp-action="Assign" asp-route-id="@item.usersId" class="btn btn-outline-success">Assign Role</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div id="pagination" class="d-flex justify-content-center mt-3"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const table = document.querySelector("table tbody");
+        const rows = table.querySelectorAll("tr");
+        const rowsPerPage = 5; // 👈 عدد الصفوف في كل صفحة
+        const totalPages = Math.ceil(rows.length / rowsPerPage);
+        let currentPage = 1;
+
+        function showPage(page) {
+            currentPage = page;
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+
+            rows.forEach((row, index) => {
+                row.style.display = (index >= start && index < end) ? "" : "none";
+            });
+
+            renderPagination();
+        }
+
+        function renderPagination() {
+            const pagination = document.getElementById("pagination");
+            pagination.innerHTML = "";
+
+            // زر Previous
+            if (currentPage > 1) {
+                const prev = document.createElement("button");
+                prev.innerText = "Previous";
+                prev.className = "btn btn-outline-primary mx-1";
+                prev.onclick = () => showPage(currentPage - 1);
+                pagination.appendChild(prev);
+            }
+
+            // الأرقام
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement("button");
+                btn.innerText = i;
+                btn.className = "btn mx-1 " + (i === currentPage ? "btn-primary" : "btn-outline-primary");
+                btn.onclick = () => showPage(i);
+                pagination.appendChild(btn);
+            }
+
+            // زر Next
+            if (currentPage < totalPages) {
+                const next = document.createElement("button");
+                next.innerText = "Next";
+                next.className = "btn btn-outline-primary mx-1";
+                next.onclick = () => showPage(currentPage + 1);
+                pagination.appendChild(next);
+            }
+        }
+
+        // أول صفحة
+        showPage(1);
+    });
+</script>
+

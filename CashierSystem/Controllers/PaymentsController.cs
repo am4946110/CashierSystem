@@ -13,101 +13,148 @@ namespace CashierSystem.Controllers
     {
         private readonly CashierSystemContext _context;
 
-        public PaymentsController(CashierSystemContext context)
+        private readonly ICustomKeyManager _keyManager;
+
+        public PaymentsController(CashierSystemContext context, ICustomKeyManager keyManager)
         {
             _context = context;
+            _keyManager = keyManager;
         }
 
-        // GET: Payments
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var cashierSystemContext = _context.Payments.Include(p => p.PaymentType).Include(p => p.Sale);
-            return View(await cashierSystemContext.ToListAsync());
+            var cashierSystemContext =await _context.Payments.Include(p => p.PaymentType).Include(p => p.Sale).ToListAsync();
+            
+            var k = cashierSystemContext.Select(p =>
+            {
+
+                p.Id = _keyManager.Protect(p.PaymentId.ToString());
+
+                return p;
+
+            }).ToList();
+
+            return View(k);
         }
 
-        // GET: Payments/Details/5
-        public async Task<IActionResult> Details(Guid? id)
+        [HttpGet]
+        public async Task<IActionResult> Details(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            var payment = await _context.Payments
-                .Include(p => p.PaymentType)
-                .Include(p => p.Sale)
-                .FirstOrDefaultAsync(m => m.PaymentId == id);
-            if (payment == null)
+            try
+            {
+                var k = Guid.Parse(_keyManager.Unprotect(id));
+
+                var payment = await _context.Payments
+                    .Include(p => p.PaymentType)
+                    .Include(p => p.Sale)
+                    .FirstOrDefaultAsync(m => m.PaymentId == k);
+
+                if (payment == null)
+                {
+                    return NotFound();
+                }
+
+                var cashierSystemContext = await _context.Payments.Include(p => p.PaymentType).Include(p => p.Sale).ToListAsync();
+
+                var kh = cashierSystemContext.Select(p =>
+                {
+
+                    p.Id = _keyManager.Protect(p.PaymentId.ToString());
+
+                    return p;
+
+                }).ToList();
+
+                return View(payment);
+            }
+            catch (Exception) 
             {
                 return NotFound();
             }
-
-            return View(payment);
         }
 
-        // GET: Payments/Create
+        [HttpGet]
         public IActionResult Create()
         {
-            ViewData["PaymentTypeId"] = new SelectList(_context.PaymentTypes, "PaymentTypeId", "PaymentTypeId");
-            ViewData["SaleId"] = new SelectList(_context.Sales, "SaleId", "SaleId");
+            ViewData["PaymentTypeId"] = new SelectList(_context.PaymentTypes, "PaymentTypeId", "TypeName");
+            ViewData["SaleId"] = new SelectList(_context.Sales, "SaleId", "SaleDate");
             return View();
         }
 
-        // POST: Payments/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("PaymentId,SaleId,PaymentTypeId,Amount,PaidAt")] Payment payment)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 payment.PaymentId = Guid.NewGuid();
                 _context.Add(payment);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PaymentTypeId"] = new SelectList(_context.PaymentTypes, "PaymentTypeId", "PaymentTypeId", payment.PaymentTypeId);
-            ViewData["SaleId"] = new SelectList(_context.Sales, "SaleId", "SaleId", payment.SaleId);
+
+            ViewData["PaymentTypeId"] = new SelectList(_context.PaymentTypes, "PaymentTypeId", "TypeName", payment.PaymentTypeId);
+            
+            ViewData["SaleId"] = new SelectList(_context.Sales, "SaleId", "SaleDate", payment.SaleId);
+            
             return View(payment);
         }
 
-        // GET: Payments/Edit/5
-        public async Task<IActionResult> Edit(Guid? id)
+        [HttpGet]
+        public async Task<IActionResult> Edit(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            var payment = await _context.Payments.FindAsync(id);
-            if (payment == null)
+            try
             {
-                return NotFound();
+                var k = Guid.Parse(_keyManager.Unprotect(id));
+
+                var payment = await _context.Payments.FindAsync(k);
+
+                if (payment == null)
+                {
+                    return NotFound();
+                }
+
+                ViewData["PaymentTypeId"] = new SelectList(_context.PaymentTypes, "PaymentTypeId", "TypeName", payment.PaymentTypeId);
+
+                ViewData["SaleId"] = new SelectList(_context.Sales, "SaleId", "SaleDate", payment.SaleId);
+
+                return View(payment);
             }
-            ViewData["PaymentTypeId"] = new SelectList(_context.PaymentTypes, "PaymentTypeId", "PaymentTypeId", payment.PaymentTypeId);
-            ViewData["SaleId"] = new SelectList(_context.Sales, "SaleId", "SaleId", payment.SaleId);
-            return View(payment);
+            catch (Exception ex) 
+            {
+                return NotFound(ex.Message);
+            }
         }
 
-        // POST: Payments/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("PaymentId,SaleId,PaymentTypeId,Amount,PaidAt")] Payment payment)
+        public async Task<IActionResult> Edit(string id, [Bind("PaymentId,SaleId,PaymentTypeId,Amount,PaidAt")] Payment payment)
         {
-            if (id != payment.PaymentId)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 try
                 {
                     _context.Update(payment);
+                    
                     await _context.SaveChangesAsync();
+                    
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -120,46 +167,68 @@ namespace CashierSystem.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
-            ViewData["PaymentTypeId"] = new SelectList(_context.PaymentTypes, "PaymentTypeId", "PaymentTypeId", payment.PaymentTypeId);
-            ViewData["SaleId"] = new SelectList(_context.Sales, "SaleId", "SaleId", payment.SaleId);
+            
+            ViewData["PaymentTypeId"] = new SelectList(_context.PaymentTypes, "PaymentTypeId", "TypeName", payment.PaymentTypeId);
+            
+            ViewData["SaleId"] = new SelectList(_context.Sales, "SaleId", "SaleDate", payment.SaleId);
+            
             return View(payment);
         }
 
-        // GET: Payments/Delete/5
-        public async Task<IActionResult> Delete(Guid? id)
+        [HttpGet]
+        public async Task<IActionResult> Delete(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            var payment = await _context.Payments
-                .Include(p => p.PaymentType)
-                .Include(p => p.Sale)
-                .FirstOrDefaultAsync(m => m.PaymentId == id);
-            if (payment == null)
+            try
+            {
+                var k = Guid.Parse(_keyManager.Unprotect(id));
+
+                var payment = await _context.Payments
+                    .Include(p => p.PaymentType)
+                    .Include(p => p.Sale)
+                    .FirstOrDefaultAsync(m => m.PaymentId == k);
+
+                if (payment == null)
+                {
+                    return NotFound();
+                }
+
+                return View(payment);
+            }
+            catch (Exception) 
             {
                 return NotFound();
             }
-
-            return View(payment);
         }
 
-        // POST: Payments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var payment = await _context.Payments.FindAsync(id);
-            if (payment != null)
+            try
             {
-                _context.Payments.Remove(payment);
-            }
+                var k = Guid.Parse(_keyManager.Unprotect(id));
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+                var payment = await _context.Payments.FindAsync(k);
+
+                if (payment != null)
+                {
+                    _context.Payments.Remove(payment);
+                
+                    await _context.SaveChangesAsync();
+                }
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception) 
+            {
+                return NotFound();
+            }
         }
 
         private bool PaymentExists(Guid id)

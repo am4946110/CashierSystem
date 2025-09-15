@@ -18,6 +18,7 @@
                 <th>@Html.DisplayNameFor(model => model.TotalAmount)</th>
                 <th>@Html.DisplayNameFor(model => model.Discount)</th>
                 <th>@Html.DisplayNameFor(model => model.NetAmount)</th>
+                <th>Details</th>
             </tr>
         </thead>
         <tbody>
@@ -33,6 +34,7 @@
                     <td>@Html.DisplayFor(modelitem => item.TotalAmount)</td>
                     <td>@Html.DisplayFor(modelitem => item.Discount)</td>
                     <td>@Html.DisplayFor(modelitem => item.NetAmount)</td>
+                    <td><a class="btn btn-info" asp-action="Details" asp-route-id="@item.Id">Details</a></td>
                 </tr>
             }
         </tbody>

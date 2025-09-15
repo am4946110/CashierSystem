@@ -1,0 +1,96 @@
+﻿<div class="d-flex  align-items-center">
+    @if (User.Identity.IsAuthenticated)
+    {
+        <div class="dropdown me-3 navbar-brand flex-wrap">
+            <button class="btn dropdown-toggle px-3 py-2 fw-bold shadow-sm w-auto text-truncate" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                @using Microsoft.AspNetCore.Identity
+            @inject SignInManager<MyUser> SignInManager
+            @inject UserManager<MyUser> UserManager
+
+            @if (SignInManager.IsSignedIn(User))
+                {
+                    var user = await UserManager.GetUserAsync(User);
+                    var imagePath = user?.ImagePath;
+
+                    if (imagePath != null && imagePath.Length > 0)
+                    {
+                        var base64Image = Convert.ToBase64String(imagePath);
+                        <img src="data:image/jpeg;base64,@base64Image" width="115" height="65" class="rounded-pill img-fluid me-2" alt="User Image" />
+                    }
+                    else
+                    {
+                        <i class="fa-solid fa-user-circle fa-2x"></i>
+                    }
+                }
+
+
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end border-0 rounded-3 w-auto" aria-labelledby="userDropdown">
+                <li>
+                    <a class="dropdown-item text-wrap" asp-controller="Accounts" asp-action="Profile">
+                        <i class="fa-solid fa-circle-user"></i> Profile
+                    </a>
+                </li>
+                @if (User.IsInRole("Admin"))
+                {
+                    <li>
+                        <a class="dropdown-item text-wrap" asp-controller="ManageRoles" asp-action="Index">
+                            <i class="fa-solid fa-key"></i> Role 
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item text-wrap" asp-controller="Accounts" asp-action="Index">
+                            <i class="fa-solid fa-users-cog"></i> Accounts
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+        <a class="btn btn-success text-wrap" asp-controller="Accounts" asp-action="Logout">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </a>
+    }
+    else
+    {
+        <a class="btn btn-success me-2 text-wrap" asp-controller="Accounts" asp-action="Login">
+            <i class="fa-solid fa-sign-in-alt"></i> Login
+        </a>
+        <a class="btn btn-primary me-2 text-wrap" asp-controller="Accounts" asp-action="Register">
+            <i class="fa-solid fa-user-plus"></i> Register
+        </a>
+    }
+</div>
+
+        <style>
+    .navbar-nav .nav-link {
+        transition: all 0.2s ease-in-out;
+        border-radius: 6px;
+        padding: 0.5rem 0.9rem;
+    }
+
+        .navbar-nav .nav-link:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
+    /* Dropdown animation */
+    .dropdown-menu {
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .dropdown-item:hover {
+        background-color: #f1f1f1;
+        transform: translateX(4px);
+    }
+
+    /* تمييز اللوجو */
+    .navbar-brand img {
+        transition: transform 0.3s;
+    }
+
+    .navbar-brand:hover img {
+        transform: rotate(-5deg) scale(1.05);
+    }
+
+        </style>

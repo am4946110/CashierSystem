@@ -1,10 +1,10 @@
 ﻿@model IEnumerable<CashierSystem.Models.SaleDetail>
 
 @{
-    ViewData["Title"] = "Sales Detail";
+    ViewData["Title"] = "Sales Details";
 }
 
-<h1 class="pb-3 text-center">Sales Detail</h1>
+<h1 class="pb-3 text-center">Sales Details</h1>
 
 <p class="pb-2">
     <a class="btn btn-success" asp-action="Create">Create New</a>
@@ -53,13 +53,13 @@
                     @Html.DisplayFor(modelItem => item.Sale.SaleDate)
                 </td>
                 <td>
-                    <a class="btn btn-dark" asp-action="Edit" asp-route-id="@item.SaleDetailId">Edit</a>
+                    <a class="btn btn-dark" asp-action="Edit" asp-route-id="@item.Id">Edit</a>
                 </td>
                 <td>
-                    <a class="btn btn-warning" asp-action="Details" asp-route-id="@item.SaleDetailId">Details</a>
+                    <a class="btn btn-warning" asp-action="Details" asp-route-id="@item.Id">Details</a>
                 </td>
                 <td>
-                    <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.SaleDetailId">Delete</a>
+                    <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
                 </td>
             </tr>
     }

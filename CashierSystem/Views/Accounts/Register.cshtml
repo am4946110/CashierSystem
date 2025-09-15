@@ -1,0 +1,101 @@
+﻿@model ViewModels.RegisterModel
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header text-center bg-dark text-white rounded-top-4">
+                    <h3 class="mb-0">Create Account</h3>
+                    <small class="fw-light">Fill in the details to register</small>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Register" enctype="multipart/form-data">
+                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                        <div class="mb-3">
+                            <label asp-for="UserName" class="form-label fw-bold"></label>
+                            <input asp-for="UserName" class="form-control form-control-lg" placeholder="Enter your username" />
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-bold"></label>
+                            <input asp-for="Email" class="form-control form-control-lg" placeholder="Enter your email" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label fw-bold"></label>
+                            <input asp-for="Password" id="pass" class="form-control form-control-lg" placeholder="Enter your password" />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+                        <div id="strength" class="mb-3"></div>
+                        <div class="mb-3">
+                            <label asp-for="ConfirmPassword" class="form-label fw-bold"></label>
+                            <input asp-for="ConfirmPassword" id="pass" class="form-control form-control-lg" placeholder="Confirm your password" />
+                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="PhoneNumber" class="form-label fw-bold"></label>
+                            <input asp-for="PhoneNumber" type="tel" class="form-control form-control-lg" placeholder="Enter phone number" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="ImageFile" class="form-label fw-bold"></label>
+                            <input asp-for="ImageFile" type="file" class="form-control form-control-lg" />
+                            <span asp-validation-for="ImageFile" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Country" class="form-label fw-bold"></label>
+                            <select id="country"  asp-for="Country" class="form-select form-select-lg"></select>
+                            <span asp-validation-for="Country" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="BirthDate" class="form-label fw-bold"></label>
+                            <input asp-for="BirthDate" type="date" class="form-control form-control-lg" />
+                            <span asp-validation-for="BirthDate" class="text-danger"></span>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-outline-dark btn-lg">Register</button>
+                        </div>
+                        <div class="text-center mt-3">
+                            <small>Already have an account? <a asp-controller="Accounts" asp-action="Login" class="text-decoration-none">Login here</a></small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/js/country.js" asp-append-version="true"></script>
+    <script>
+        const PasswordInput = document.getElementById("pass");
+        const strengthText = document.getElementById("strength");
+
+        PasswordInput.addEventListener("input", () => {
+            const value = PasswordInput.value; 
+
+            let strength = "Weak";  
+            let className = " h4 text-danger";
+
+            if (value.length >= 8 && /[A-Z]/.test(value) && /\d/.test(value) && /[^A-Za-z0-9]/.test(value)) {
+                strength = "Strong";
+                className = "h4 text-success";
+            }
+            else if (value.length >= 6 && (/[A-Z]/.test(value) || /\d/.test(value))) {
+                strength = "Medium";
+                className = "h4 text-warning";
+            }
+
+            strengthText.textContent = `Strength: ${strength}`;
+            strengthText.className = className;
+        });
+    </script>
+
+}

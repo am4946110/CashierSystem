@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CashierSystem.Models;
 
 public partial class Customer
 {
-
-    public Guid CustomerId { get; set; }
+    [NotMapped]
+    public string Id { get; set; }
+    public Guid CustomerId { get; set; } = Guid.NewGuid();
 
     public string FullName { get; set; } = null!;
 

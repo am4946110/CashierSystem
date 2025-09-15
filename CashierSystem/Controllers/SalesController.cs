@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using CashierSystem.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using CashierSystem.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace CashierSystem.Controllers
 {
@@ -13,97 +14,144 @@ namespace CashierSystem.Controllers
     {
         private readonly CashierSystemContext _context;
 
-        public SalesController(CashierSystemContext context)
+        private readonly ApplicationDbContext _application;
+
+        private readonly ICustomKeyManager _keyManager;
+
+        public SalesController(CashierSystemContext context, ApplicationDbContext application,ICustomKeyManager keyManager)
         {
             _context = context;
+            _application = application;
+            _keyManager = keyManager;
         }
 
-        // GET: Sales
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var cashierSystemContext = _context.Sales.Include(s => s.Customer);
-            return View(await cashierSystemContext.ToListAsync());
+            var cashierSystemContext = await _context.Sales.Include(s => s.Customer).ToListAsync();
+
+            var k = cashierSystemContext.Select(s =>
+            {
+                s.Id = _keyManager.Protect(s.SaleId.ToString());
+
+                return s;
+
+            }).ToList();
+
+            return View(k);
         }
 
-        // GET: Sales/Details/5
-        public async Task<IActionResult> Details(Guid? id)
+        public async Task<IActionResult> Details(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            var sale = await _context.Sales
-                .Include(s => s.Customer)
-                .FirstOrDefaultAsync(m => m.SaleId == id);
-            if (sale == null)
+            try
+            {
+
+                var kk = Guid.Parse(_keyManager.Unprotect(id));
+
+                var sale = await _context.Sales
+                    .Include(s => s.Customer)
+                    .FirstOrDefaultAsync(m => m.SaleId == kk);
+
+                if (sale == null)
+                {
+                    return NotFound();
+                }
+
+                var cashierSystemContext = await _context.Sales.Include(s => s.Customer).ToListAsync();
+
+                var k = cashierSystemContext.Select(s =>
+                {
+                    s.Id = _keyManager.Protect(s.SaleId.ToString());
+
+                    return s;
+
+                }).ToList();
+
+                return View(sale);
+            }
+            catch (Exception) 
             {
                 return NotFound();
             }
-
-            return View(sale);
         }
 
-        // GET: Sales/Create
+        [HttpGet]
         public IActionResult Create()
         {
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "CustomerId");
+            ViewData["Message"] = new SelectList(_application.MyUsers, "Id", "UserName");
+            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "FullName");
             return View();
         }
 
-        // POST: Sales/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("SaleId,CustomerId,UserId,SaleDate,TotalAmount,Discount,NetAmount")] Sale sale)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 sale.SaleId = Guid.NewGuid();
                 _context.Add(sale);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "CustomerId", sale.CustomerId);
+
+            ViewData["Message"] = new SelectList(_application.MyUsers, "Id", "UserName",sale.UserId);
+            
+            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "FullName", sale.CustomerId);
+            
             return View(sale);
         }
 
-        // GET: Sales/Edit/5
-        public async Task<IActionResult> Edit(Guid? id)
+        public async Task<IActionResult> Edit(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            var sale = await _context.Sales.FindAsync(id);
-            if (sale == null)
+            try
             {
-                return NotFound();
+                var k = Guid.Parse(_keyManager.Unprotect(id));
+
+                var sale = await _context.Sales.FindAsync(k);
+
+                if (sale == null)
+                {
+                    return NotFound();
+                }
+                ViewData["Message"] = new SelectList(_application.MyUsers, "Id", "UserName", sale.UserId);
+                ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "FullName", sale.CustomerId);
+                return View(sale);
             }
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "CustomerId", sale.CustomerId);
-            return View(sale);
+            catch (Exception) 
+            {
+                return BadRequest();
+            }
         }
 
-        // POST: Sales/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("SaleId,CustomerId,UserId,SaleDate,TotalAmount,Discount,NetAmount")] Sale sale)
+        public async Task<IActionResult> Edit(string id, [Bind("SaleId,CustomerId,UserId,SaleDate,TotalAmount,Discount,NetAmount")] Sale sale)
         {
-            if (id != sale.SaleId)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 try
                 {
                     _context.Update(sale);
+                    
                     await _context.SaveChangesAsync();
+                    
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -116,44 +164,68 @@ namespace CashierSystem.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
-            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "CustomerId", sale.CustomerId);
+            
+            ViewData["Message"] = new SelectList(_application.MyUsers, "Id", "UserName", sale.UserId);
+            
+            ViewData["CustomerId"] = new SelectList(_context.Customers, "CustomerId", "FullName", sale.CustomerId);
+            
             return View(sale);
         }
 
-        // GET: Sales/Delete/5
-        public async Task<IActionResult> Delete(Guid? id)
+        [HttpGet]
+        public async Task<IActionResult> Delete(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            var sale = await _context.Sales
-                .Include(s => s.Customer)
-                .FirstOrDefaultAsync(m => m.SaleId == id);
-            if (sale == null)
+            try
+            {
+                var k = Guid.Parse(_keyManager.Unprotect(id));
+
+                var sale = await _context.Sales
+                    .Include(s => s.Customer)
+                    .FirstOrDefaultAsync(m => m.SaleId == k);
+
+                if (sale == null)
+                {
+                    return NotFound();
+                }
+
+                return View(sale);
+            }
+            catch (Exception) 
             {
                 return NotFound();
             }
-
-            return View(sale);
         }
 
-        // POST: Sales/Delete/5
+
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var sale = await _context.Sales.FindAsync(id);
-            if (sale != null)
+            try
             {
-                _context.Sales.Remove(sale);
-            }
+                var k = Guid.Parse(_keyManager.Unprotect(id));
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+                var sale = await _context.Sales.FindAsync(k);
+
+                if (sale != null)
+                {
+                    _context.Sales.Remove(sale);
+
+                    await _context.SaveChangesAsync();
+                }
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception) 
+            {
+                return NotFound();
+            }
         }
 
         private bool SaleExists(Guid id)

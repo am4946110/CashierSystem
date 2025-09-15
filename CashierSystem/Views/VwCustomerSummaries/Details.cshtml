@@ -1,0 +1,26 @@
+﻿@model  VwCustomerSummary
+@{
+    ViewData["Title"] = "Details";
+}
+
+
+<div class="card-body">
+    <h1 class="card-header text-center">Details</h1>
+
+    <dl class="row">
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.FullName)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.FullName)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.TotalOrders)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.TotalOrders)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.TotalSpent)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.TotalSpent)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.FirstPurchase)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.FirstPurchase)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.LastPurchase)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.LastPurchase)</dd>
+    </dl>
+</div>

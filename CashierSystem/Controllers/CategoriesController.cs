@@ -13,49 +13,81 @@ namespace CashierSystem.Controllers
     {
         private readonly CashierSystemContext _context;
 
-        public CategoriesController(CashierSystemContext context)
+        private readonly ICustomKeyManager _keyManager;
+
+        public CategoriesController(CashierSystemContext context, ICustomKeyManager keyManager)
         {
             _context = context;
+            _keyManager = keyManager;
         }
 
-        // GET: Categories
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Categories.ToListAsync());
+            var sh = await _context.Categories.ToListAsync();
+
+            var ke = sh.Select(s =>
+            {
+                s.Id = _keyManager.Protect(s.CategoryId.ToString());
+
+                return s;
+
+            }).ToList();
+
+            return View(ke);
         }
 
-        // GET: Categories/Details/5
-        public async Task<IActionResult> Details(Guid? id)
+        [HttpGet]
+        public async Task<IActionResult> Details(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            var category = await _context.Categories
-                .FirstOrDefaultAsync(m => m.CategoryId == id);
-            if (category == null)
+            try
             {
-                return NotFound();
+                var ke = Guid.Parse(_keyManager.Unprotect(id));
+
+                var category = await _context.Categories
+                    .FirstOrDefaultAsync(m => m.CategoryId == ke);
+                
+                if (category == null)
+                {
+                    return NotFound();
+                }
+
+                var sh = await _context.Categories.ToListAsync();
+
+                var kee = sh.Select(s =>
+                {
+                    s.Id = _keyManager.Protect(s.CategoryId.ToString());
+
+                    return s;
+
+                }).ToList();
+
+
+                return View(category);
+            }
+            catch (Exception ex) 
+            {
+                return BadRequest(ex.Message);
             }
 
-            return View(category);
         }
 
-        // GET: Categories/Create
+        [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Categories/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("CategoryId,CategoryName,Description")] Category category)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 category.CategoryId = Guid.NewGuid();
                 _context.Add(category);
@@ -65,40 +97,50 @@ namespace CashierSystem.Controllers
             return View(category);
         }
 
-        // GET: Categories/Edit/5
-        public async Task<IActionResult> Edit(Guid? id)
+        [HttpGet]
+        public async Task<IActionResult> Edit(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            var category = await _context.Categories.FindAsync(id);
-            if (category == null)
+            try
             {
-                return NotFound();
+
+                var kee = Guid.Parse(_keyManager.Unprotect(id));
+
+                var category = await _context.Categories.FindAsync(kee);
+
+                if (category == null)
+                {
+                    return NotFound();
+                }
+
+                return View(category);
             }
-            return View(category);
+            catch (Exception ex) 
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-        // POST: Categories/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("CategoryId,CategoryName,Description")] Category category)
+        public async Task<IActionResult> Edit(string id, [Bind("CategoryId,CategoryName,Description")] Category category)
         {
-            if (id != category.CategoryId)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 try
                 {
                     _context.Update(category);
                     await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -111,42 +153,61 @@ namespace CashierSystem.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
+
             return View(category);
         }
 
-        // GET: Categories/Delete/5
-        public async Task<IActionResult> Delete(Guid? id)
+        [HttpGet]
+        public async Task<IActionResult> Delete(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            var category = await _context.Categories
-                .FirstOrDefaultAsync(m => m.CategoryId == id);
-            if (category == null)
+            try
             {
-                return NotFound();
-            }
+                var kee = Guid.Parse(_keyManager.Unprotect(id));
 
-            return View(category);
+                var category = await _context.Categories
+                    .FirstOrDefaultAsync(m => m.CategoryId == kee);
+
+                if (category == null)
+                {
+                    return NotFound();
+                }
+
+                return View(category);
+            }
+            catch (Exception) 
+            {
+                return BadRequest();
+            }
         }
 
-        // POST: Categories/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var category = await _context.Categories.FindAsync(id);
-            if (category != null)
+            try
             {
-                _context.Categories.Remove(category);
-            }
+                var ke = Guid.Parse(_keyManager.Unprotect(id));
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+                var category = await _context.Categories.FindAsync(ke);
+
+                if (category != null)
+                {
+                    _context.Categories.Remove(category);
+                    await _context.SaveChangesAsync();
+                }
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception) 
+            {
+                return BadRequest();
+            }
         }
 
         private bool CategoryExists(Guid id)

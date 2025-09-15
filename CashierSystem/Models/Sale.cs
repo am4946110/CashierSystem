@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CashierSystem.Models;
 
 public partial class Sale
 {
+    [NotMapped]
+    public string Id { get; set; }
 
-    public Guid SaleId { get; set; }
+    public Guid SaleId { get; set; } = Guid.NewGuid();
 
     public Guid? CustomerId { get; set; }
 
@@ -21,6 +24,8 @@ public partial class Sale
     public decimal? NetAmount { get; set; }
 
     public virtual Customer? Customer { get; set; }
+    [NotMapped]
+    public virtual MyUser? User { get; set; }
 
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
 

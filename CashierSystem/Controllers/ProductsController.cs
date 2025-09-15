@@ -13,101 +13,145 @@ namespace CashierSystem.Controllers
     {
         private readonly CashierSystemContext _context;
 
-        public ProductsController(CashierSystemContext context)
+        private readonly ICustomKeyManager _keyManager;
+
+        public ProductsController(CashierSystemContext context, ICustomKeyManager keyManager)
         {
             _context = context;
+            _keyManager = keyManager;
         }
 
-        // GET: Products
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var cashierSystemContext = _context.Products.Include(p => p.Category).Include(p => p.Supplier);
-            return View(await cashierSystemContext.ToListAsync());
+            var cashierSystemContext = await _context.Products.Include(p => p.Category).Include(p => p.Supplier).ToListAsync();
+
+            var k = cashierSystemContext.Select(p =>
+            {
+                p.Id = _keyManager.Protect(p.ProductId.ToString());
+
+                return p;
+            
+            }).ToList();
+
+            return View(k);
         }
 
-        // GET: Products/Details/5
-        public async Task<IActionResult> Details(Guid? id)
+        [HttpGet]
+        public async Task<IActionResult> Details(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
-
-            var product = await _context.Products
-                .Include(p => p.Category)
-                .Include(p => p.Supplier)
-                .FirstOrDefaultAsync(m => m.ProductId == id);
-            if (product == null)
+            try
             {
-                return NotFound();
-            }
+                var kk = Guid.Parse(_keyManager.Unprotect(id));
 
-            return View(product);
+                var product = await _context.Products
+                    .Include(p => p.Category)
+                    .Include(p => p.Supplier)
+                    .FirstOrDefaultAsync(m => m.ProductId == kk);
+
+                if (product == null)
+                {
+                    return NotFound();
+                }
+
+                var cashierSystemContext = await _context.Products.Include(p => p.Category).Include(p => p.Supplier).ToListAsync();
+
+                var k = cashierSystemContext.Select(p =>
+                {
+                    p.Id = _keyManager.Protect(p.ProductId.ToString());
+
+                    return p;
+
+                }).ToList();
+
+                return View(product);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-        // GET: Products/Create
+        [HttpGet]
         public IActionResult Create()
         {
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryId");
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "SupplierId");
+            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryName");
+            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "SupplierName");
             return View();
         }
 
-        // POST: Products/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ProductId,ProductName,CategoryId,SupplierId,Barcode,CostPrice,SalePrice,ReorderLevel,IsActive,CreatedAt")] Product product)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 product.ProductId = Guid.NewGuid();
                 _context.Add(product);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryId", product.CategoryId);
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "SupplierId", product.SupplierId);
+            
+            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryName", product.CategoryId);
+            
+            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "SupplierName", product.SupplierId);
+            
             return View(product);
         }
 
-        // GET: Products/Edit/5
-        public async Task<IActionResult> Edit(Guid? id)
+        [HttpGet]
+        public async Task<IActionResult> Edit(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
+            try
+            {
+                var kk = Guid.Parse(_keyManager.Unprotect(id));
+
+                var product = await _context.Products.FindAsync(kk);
+
+                if (product == null)
+                {
+                    return NotFound();
+                }
+
+                ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryName", product.CategoryId);
+
+                ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "SupplierName", product.SupplierId);
+
+                return View(product);
+            }
+            catch (Exception) 
             {
                 return NotFound();
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryId", product.CategoryId);
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "SupplierId", product.SupplierId);
-            return View(product);
         }
 
-        // POST: Products/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("ProductId,ProductName,CategoryId,SupplierId,Barcode,CostPrice,SalePrice,ReorderLevel,IsActive,CreatedAt")] Product product)
+        public async Task<IActionResult> Edit(string id, [Bind("ProductId,ProductName,CategoryId,SupplierId,Barcode,CostPrice,SalePrice,ReorderLevel,IsActive,CreatedAt")] Product product)
         {
-            if (id != product.ProductId)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 try
                 {
                     _context.Update(product);
+                    
                     await _context.SaveChangesAsync();
+                    
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -120,46 +164,64 @@ namespace CashierSystem.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryId", product.CategoryId);
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "SupplierId", product.SupplierId);
+            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryName", product.CategoryId);
+            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "SupplierName", product.SupplierId);
             return View(product);
         }
 
-        // GET: Products/Delete/5
-        public async Task<IActionResult> Delete(Guid? id)
+        [HttpGet]
+        public async Task<IActionResult> Delete(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            var product = await _context.Products
-                .Include(p => p.Category)
-                .Include(p => p.Supplier)
-                .FirstOrDefaultAsync(m => m.ProductId == id);
-            if (product == null)
+            try
+            {
+                var kk = Guid.Parse(_keyManager.Unprotect(id));
+
+                var product = await _context.Products
+                    .Include(p => p.Category)
+                    .Include(p => p.Supplier)
+                    .FirstOrDefaultAsync(m => m.ProductId == kk);
+                if (product == null)
+                {
+                    return NotFound();
+                }
+
+                return View(product);
+            }
+            catch (Exception) 
             {
                 return NotFound();
             }
-
-            return View(product);
         }
 
-        // POST: Products/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product != null)
+            try
             {
-                _context.Products.Remove(product);
-            }
+                var kk = Guid.Parse(_keyManager.Unprotect(id));
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+                var product = await _context.Products.FindAsync(id);
+
+                if (product != null)
+                {
+                    _context.Products.Remove(product);
+
+                    await _context.SaveChangesAsync();
+                }
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
         }
 
         private bool ProductExists(Guid id)

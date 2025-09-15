@@ -47,13 +47,13 @@
                     @Html.DisplayFor(modelItem => item.Address)
                 </td>
                 <td>
-                    <a class="btn btn-dark" asp-action="Edit" asp-route-id="@item.SupplierId">Edit</a> 
+                    <a class="btn btn-dark" asp-action="Edit" asp-route-id="@item.Id">Edit</a> 
                 </td>
                 <td>
-                    <a class="btn btn-warning" asp-action="Details" asp-route-id="@item.SupplierId">Details</a>
+                    <a class="btn btn-warning" asp-action="Details" asp-route-id="@item.Id">Details</a>
                 </td>
                 <td>
-                    <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.SupplierId">Delete</a>
+                    <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
                 </td>
             </tr>
     }

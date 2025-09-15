@@ -1,0 +1,83 @@
+﻿@model MyUser
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <!-- Form Card -->
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header text-center bg-warning text-dark rounded-top-4">
+                    <h3 class="mb-0">Edit User</h3>
+                    <small class="fw-light">Update your account details</small>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Edit" enctype="multipart/form-data">
+                        <input type="hidden" asp-for="Id" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        <div class="mb-3">
+                            <label asp-for="UserName" class="form-label fw-bold"></label>
+                            <input asp-for="UserName" class="form-control form-control-lg" placeholder="Enter username" />
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-bold"></label>
+                            <input asp-for="Email" class="form-control form-control-lg" placeholder="Enter email" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="PhoneNumber" class="form-label fw-bold"></label>
+                            <input asp-for="PhoneNumber" class="form-control form-control-lg" placeholder="Enter phone number" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="ImageFile" class="form-label fw-bold"></label>
+                            <input asp-for="ImageFile" id="imageInput" type="file" class="form-control form-control-lg" />
+                            <span asp-validation-for="ImageFile" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Country" class="form-label fw-bold"></label>
+                            <select id="country" asp-for="Country" class="form-select form-select-lg"></select>
+                            <span asp-validation-for="Country" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="BirthDate" class="form-label fw-bold"></label>
+                            <input asp-for="BirthDate" type="date" class="form-control form-control-lg" />
+                            <span asp-validation-for="BirthDate" class="text-danger"></span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="submit" class="btn btn-outline-warning btn-lg">Save</button>
+                            <a class="btn btn-outline-secondary btn-lg" asp-action="Index">Back to List</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mt-4 mt-md-0 text-center">
+            <div class="card shadow-sm border-0 rounded-4 p-3">
+                <label class="fw-bold">Current Image</label>
+                <div class="mb-3">
+                    @if (Model.ImagePath != null && Model.ImagePath.Length > 0)
+                    {
+                        <img src="data:image/jpeg;base64,@Convert.ToBase64String(Model.ImagePath)"
+                             class="rounded-circle border border-3 border-light shadow custom-img"
+                             style="width:100px;height:100px;object-fit:cover;" />
+                    }
+                    else
+                    {
+                        <i class="fa-solid fa-user-circle fa-4x text-light"></i>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/js/country.js" asp-append-version="true"></script>
+}

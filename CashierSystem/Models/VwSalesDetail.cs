@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CashierSystem.Models;
 
 public partial class VwSalesDetail
 {
+    [NotMapped]
+    public string Id { get; set; }
     public Guid SaleId { get; set; }
 
     public DateTime? SaleDate { get; set; }

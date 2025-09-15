@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CashierSystem.Models;
 
 public partial class PaymentType
 {
-    public Guid PaymentTypeId { get; set; }
+    [NotMapped]
+    public string Id { get; set; }
+    public Guid PaymentTypeId { get; set; } = Guid.NewGuid();
 
     public string TypeName { get; set; } = null!;
 

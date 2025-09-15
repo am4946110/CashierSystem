@@ -4,41 +4,35 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
-
-<h4>Payment</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="PaymentId" class="control-label"></label>
-                <input asp-for="PaymentId" class="form-control" />
-                <span asp-validation-for="PaymentId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="SaleId" class="control-label"></label>
-                <select asp-for="SaleId" class ="form-control" asp-items="ViewBag.SaleId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="PaymentTypeId" class="control-label"></label>
-                <select asp-for="PaymentTypeId" class ="form-control" asp-items="ViewBag.PaymentTypeId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="Amount" class="control-label"></label>
-                <input asp-for="Amount" class="form-control" />
-                <span asp-validation-for="Amount" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+<div class="card">
+    <div class="card-header">
+        <h1 class="text-center pb-3">Payment</h1>
+        <h4 class="text-center pb-3">Create</h4>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
+    <div class="row card-body justify-content-center">
+        <div class="col-md-4">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group mb-3">
+                    <label asp-for="SaleId" class="control-label"></label>
+                    <select asp-for="SaleId" class ="form-control" asp-items="ViewBag.SaleId"></select>
+                </div>
+                <div class="form-group mb-3">
+                    <label asp-for="PaymentTypeId" class="control-label"></label>
+                    <select asp-for="PaymentTypeId" class ="form-control" asp-items="ViewBag.PaymentTypeId"></select>
+                </div>
+                <div class="form-group mb-3">
+                    <label asp-for="Amount" class="control-label"></label>
+                    <input asp-for="Amount" class="form-control" />
+                    <span asp-validation-for="Amount" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-3">
+                    <input type="submit" value="Create" class="btn btn-primary" />
+                    <a class="btn btn-dark" asp-action="Index">Back to List</a>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 @section Scripts {

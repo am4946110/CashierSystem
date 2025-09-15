@@ -90,7 +90,8 @@ namespace CashierSystem.Models
         [NotMapped]
         public IFormFile ImageFile { get; set; }
 
-    
+        [NotMapped]
+        public virtual ICollection<Sale> Sale { get; set; } = new List<Sale>();
     }
 
     [Table("ProtectionKey", Schema = "key")]

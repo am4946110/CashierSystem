@@ -1,0 +1,39 @@
+﻿@model  VwSalesDetail
+@{
+    ViewData["Title"] = "Details";
+}
+
+<div class="card-body">
+    <h1 class="card-header text-center">Details</h1>
+
+    <dl class="row">
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.SaleDate)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.SaleDate)</dd>
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.CustomerName)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.CustomerName)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ProductName)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.ProductName)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.CustomerName)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.CustomerName)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Quantity)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Quantity)</dd>
+        
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.UnitPrice)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.UnitPrice)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.LineTotal)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.LineTotal)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.TotalAmount)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.TotalAmount)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Discount)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Discount)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.NetAmount)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.NetAmount)</dd>
+    </dl>
+</div>

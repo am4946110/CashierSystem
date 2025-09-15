@@ -1,0 +1,25 @@
+﻿@model VwPayment
+@{
+    ViewData["Title"] = "Details";
+}
+
+<div class="card-body">
+    <h1 class="card-header text-center">Details</h1>
+
+    <dl class="row">
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.NetAmount)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.NetAmount)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.NetAmount)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.NetAmount)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.PaymentType)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.PaymentType)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.CustomerName)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.CustomerName)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.PaidAt)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.PaidAt)</dd>
+    </dl>
+</div>

@@ -13,97 +13,138 @@ namespace CashierSystem.Controllers
     {
         private readonly CashierSystemContext _context;
 
-        public StockTransactionsController(CashierSystemContext context)
+        private readonly ICustomKeyManager _keyManager;
+
+        public StockTransactionsController(CashierSystemContext context, ICustomKeyManager keyManager)
         {
             _context = context;
+            _keyManager = keyManager;
         }
 
-        // GET: StockTransactions
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var cashierSystemContext = _context.StockTransactions.Include(s => s.Product);
-            return View(await cashierSystemContext.ToListAsync());
+            var cashierSystemContext = await _context.StockTransactions.Include(s => s.Product).ToListAsync();
+
+            var k = cashierSystemContext.Select(s =>
+            {
+                s.Id = _keyManager.Protect(s.TransactionId.ToString());
+
+                return s;
+            
+            }).ToList();    
+
+            return View(k);
         }
 
-        // GET: StockTransactions/Details/5
-        public async Task<IActionResult> Details(Guid? id)
+        [HttpGet]
+        public async Task<IActionResult> Details(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            var stockTransaction = await _context.StockTransactions
-                .Include(s => s.Product)
-                .FirstOrDefaultAsync(m => m.TransactionId == id);
-            if (stockTransaction == null)
+            try
+            {
+                var kk = Guid.Parse(_keyManager.Unprotect(id));
+
+                var stockTransaction = await _context.StockTransactions
+                    .Include(s => s.Product)
+                    .FirstOrDefaultAsync(m => m.TransactionId == kk);
+
+                if (stockTransaction == null)
+                {
+                    return NotFound();
+                }
+
+                var cashierSystemContext = await _context.StockTransactions.Include(s => s.Product).ToListAsync();
+
+                var k = cashierSystemContext.Select(s =>
+                {
+                    s.Id = _keyManager.Protect(s.TransactionId.ToString());
+
+                    return s;
+
+                }).ToList();
+
+                return View(stockTransaction);
+            }
+            catch (Exception) 
             {
                 return NotFound();
             }
-
-            return View(stockTransaction);
         }
 
-        // GET: StockTransactions/Create
+        [HttpGet]
         public IActionResult Create()
         {
-            ViewData["ProductId"] = new SelectList(_context.Products, "ProductId", "ProductId");
+            ViewData["ProductId"] = new SelectList(_context.Products, "ProductId", "ProductName");
             return View();
         }
 
-        // POST: StockTransactions/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("TransactionId,ProductId,Quantity,TransactionType,TransactionDate,Reference")] StockTransaction stockTransaction)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 stockTransaction.TransactionId = Guid.NewGuid();
                 _context.Add(stockTransaction);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ProductId"] = new SelectList(_context.Products, "ProductId", "ProductId", stockTransaction.ProductId);
+            ViewData["ProductId"] = new SelectList(_context.Products, "ProductId", "ProductName", stockTransaction.ProductId);
             return View(stockTransaction);
         }
 
-        // GET: StockTransactions/Edit/5
-        public async Task<IActionResult> Edit(Guid? id)
+        [HttpGet]
+        public async Task<IActionResult> Edit(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            var stockTransaction = await _context.StockTransactions.FindAsync(id);
-            if (stockTransaction == null)
+            try
             {
-                return NotFound();
+                var k = Guid.Parse(_keyManager.Unprotect(id));
+
+                var stockTransaction = await _context.StockTransactions.FindAsync(k);
+
+                if (stockTransaction == null)
+                {
+                    return NotFound();
+                }
+
+                ViewData["ProductId"] = new SelectList(_context.Products, "ProductId", "ProductName", stockTransaction.ProductId);
+
+                return View(stockTransaction);
             }
-            ViewData["ProductId"] = new SelectList(_context.Products, "ProductId", "ProductId", stockTransaction.ProductId);
-            return View(stockTransaction);
+            catch (Exception) 
+            {
+                return BadRequest();
+            }
         }
 
-        // POST: StockTransactions/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("TransactionId,ProductId,Quantity,TransactionType,TransactionDate,Reference")] StockTransaction stockTransaction)
+        public async Task<IActionResult> Edit(string id, [Bind("TransactionId,ProductId,Quantity,TransactionType,TransactionDate,Reference")] StockTransaction stockTransaction)
         {
-            if (id != stockTransaction.TransactionId)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 try
                 {
                     _context.Update(stockTransaction);
+                    
                     await _context.SaveChangesAsync();
+                    
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -116,44 +157,65 @@ namespace CashierSystem.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
-            ViewData["ProductId"] = new SelectList(_context.Products, "ProductId", "ProductId", stockTransaction.ProductId);
+            
+            ViewData["ProductId"] = new SelectList(_context.Products, "ProductId", "ProductName", stockTransaction.ProductId);
+            
             return View(stockTransaction);
         }
 
-        // GET: StockTransactions/Delete/5
-        public async Task<IActionResult> Delete(Guid? id)
+        [HttpGet]
+        public async Task<IActionResult> Delete(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            var stockTransaction = await _context.StockTransactions
-                .Include(s => s.Product)
-                .FirstOrDefaultAsync(m => m.TransactionId == id);
-            if (stockTransaction == null)
+            try
+            {
+                var k = Guid.Parse(_keyManager.Unprotect(id));
+
+                var stockTransaction = await _context.StockTransactions
+                    .Include(s => s.Product)
+                    .FirstOrDefaultAsync(m => m.TransactionId == k);
+
+                if (stockTransaction == null)
+                {
+                    return NotFound();
+                }
+
+                return View(stockTransaction);
+            }
+            catch (Exception) 
             {
                 return NotFound();
             }
-
-            return View(stockTransaction);
         }
 
-        // POST: StockTransactions/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var stockTransaction = await _context.StockTransactions.FindAsync(id);
-            if (stockTransaction != null)
+            try
             {
-                _context.StockTransactions.Remove(stockTransaction);
-            }
+                var k = Guid.Parse(_keyManager.Unprotect(id));
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+                var stockTransaction = await _context.StockTransactions.FindAsync(k);
+
+                if (stockTransaction != null)
+                {
+                    _context.StockTransactions.Remove(stockTransaction);
+
+                    await _context.SaveChangesAsync();
+                }
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception) 
+            {
+                return NotFound();
+            }
         }
 
         private bool StockTransactionExists(Guid id)

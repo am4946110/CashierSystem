@@ -7,13 +7,14 @@
 
 <div class="table-responsive">
     <table class="table mt-2 table-hover align-middle">
-        <thead class="table-light">
+        <thead class="table-danger">
             <tr>
                 <th>@Html.DisplayNameFor(model => model.NetAmount)</th>
                 <th>@Html.DisplayNameFor(model => model.Amount)</th>
                 <th>@Html.DisplayNameFor(model => model.PaymentType)</th>
                 <th>@Html.DisplayNameFor(model => model.CustomerName)</th>
                 <th>@Html.DisplayNameFor(model => model.PaidAt)</th>
+                <th>Details</th>
             </tr>
         </thead>
         <tbody>
@@ -25,8 +26,10 @@
                     <td>@Html.DisplayFor(modelitem => item.PaymentType)</td>
                     <td>@Html.DisplayFor(modelitem => item.CustomerName)</td>
                     <td>@Html.DisplayFor(modelitem => item.PaidAt)</td>
+                    <td><a class="btn btn-info" asp-action="Details" asp-route-id="@item.Id">Details</a></td>
                 </tr>
             }
         </tbody>
     </table>
 </div>
+

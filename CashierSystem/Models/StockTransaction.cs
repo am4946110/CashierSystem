@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CashierSystem.Models;
 
 public partial class StockTransaction
 {
+    [NotMapped]
+    public string Id { get; set; }
 
-    public Guid TransactionId { get; set; }
+    public Guid TransactionId { get; set; } = Guid.NewGuid();
 
     public Guid ProductId { get; set; }
 

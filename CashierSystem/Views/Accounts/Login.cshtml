@@ -1,0 +1,63 @@
+﻿@model ViewModels.LoginModel
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5 col-lg-4">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header text-center bg-primary text-white rounded-top-4">
+                    <h3 class="mb-0">Welcome Back</h3>
+                    <small class="fw-light">Login to your account</small>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-bold"></label>
+                            <input asp-for="Email" class="form-control form-control-lg" placeholder="Enter your email" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label fw-bold"></label>
+                            <input asp-for="Password" id="loginPass" class="form-control form-control-lg" placeholder="Enter your password" />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" asp-for="RememberMe" />
+                            <label class="form-check-label fw-bold">
+                                @Html.DisplayNameFor(model => model.RememberMe)
+                            </label>
+                        </div>
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-outline-primary btn-lg">Login</button>
+                        </div>
+                        <div class="text-center mb-3">
+                            <a class="text-decoration-none" id="loginBtn" asp-controller="Accounts" asp-action="Register">Register</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        let attempts = 0;
+        const maxAttempts = 3;
+        document.getElementById("loginBtn").addEventListener("click",() => {
+            const pass =document.getElementById("loginPass").value;
+
+            if(attempts >= maxAttempts){
+                alert("Account locked. Too many attempts!");
+            }
+        });
+    </script>
+}
