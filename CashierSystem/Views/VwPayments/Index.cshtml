@@ -1,7 +1,32 @@
-﻿
+﻿@model IEnumerable<CashierSystem.Models.VwPayment>
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Payment";
 }
 
-<h1>Index</h1>
+<h1 class="text-center pb-4">Payment</h1>
 
+<div class="table-responsive">
+    <table class="table mt-2 table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.NetAmount)</th>
+                <th>@Html.DisplayNameFor(model => model.Amount)</th>
+                <th>@Html.DisplayNameFor(model => model.PaymentType)</th>
+                <th>@Html.DisplayNameFor(model => model.CustomerName)</th>
+                <th>@Html.DisplayNameFor(model => model.PaidAt)</th>
+            </tr>
+        </thead>
+        <tbody>
+           @foreach(var item in Model)
+           {
+                <tr>
+                    <td>@Html.DisplayFor(modelitem => item.NetAmount)</td>
+                    <td>@Html.DisplayFor(modelitem => item.Amount)</td>
+                    <td>@Html.DisplayFor(modelitem => item.PaymentType)</td>
+                    <td>@Html.DisplayFor(modelitem => item.CustomerName)</td>
+                    <td>@Html.DisplayFor(modelitem => item.PaidAt)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
