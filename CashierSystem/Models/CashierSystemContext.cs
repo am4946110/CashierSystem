@@ -16,6 +16,8 @@ public partial class CashierSystemContext : DbContext
     }
 
 
+  
+
     public virtual DbSet<Category> Categories { get; set; }
 
     public virtual DbSet<Customer> Customers { get; set; }
@@ -47,6 +49,10 @@ public partial class CashierSystemContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<StockTransaction>()
+          .Property(t => t.TransactionType)
+          .HasConversion<string>();  // saves enum
+
         modelBuilder.Entity<Category>(entity =>
         {
             entity.HasKey(e => e.CategoryId).HasName("PK__Categori__19093A0B127515B6");

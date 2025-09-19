@@ -4,13 +4,14 @@
     ViewData["Title"] = "Delete";
 }
 
-<h1>Delete</h1>
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>StockTransaction</h4>
-    <hr />
-    <dl class="row">
+<div class="card">
+    <div class="card-header">
+        <h4 class="text-center pb-3">Delete</h4>
+        <h1 class="text-center pb-3">Stock Transaction</h1>
+        <h3 class="text-center pb-3">Are you sure you want to delete this?</h3>
+    </div>
+    <dl class="row card-body">
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Quantity)
         </dt>
@@ -42,10 +43,11 @@
             @Html.DisplayFor(model => model.Product.ProductName)
         </dd>
     </dl>
-    
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="TransactionId" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
+    <div class="card-footer">
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="TransactionId" />
+            <input type="submit" value="Delete" class="btn btn-danger" /> |
+            <a class="btn btn-dark" asp-action="Index">Back to List</a>
+        </form>
+    </div>
 </div>

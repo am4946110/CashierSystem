@@ -66,3 +66,62 @@
         </tbody>
     </table>
 </div>
+<div id="pagination" class="d-flex justify-content-center mt-3"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const table = document.querySelector("table tbody");
+        const rows = table.querySelectorAll("tr");
+        const rowsPerPage = 5; // 👈 عدد الصفوف في كل صفحة
+        const totalPages = Math.ceil(rows.length / rowsPerPage);
+        let currentPage = 1;
+
+        function showPage(page) {
+            currentPage = page;
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+
+            rows.forEach((row, index) => {
+                row.style.display = (index >= start && index < end) ? "" : "none";
+            });
+
+            renderPagination();
+        }
+
+        function renderPagination() {
+            const pagination = document.getElementById("pagination");
+            pagination.innerHTML = "";
+
+            // زر Previous
+            if (currentPage > 1) {
+                const prev = document.createElement("button");
+                prev.innerText = "Previous";
+                prev.className = "btn btn-outline-primary mx-1";
+                prev.onclick = () => showPage(currentPage - 1);
+                pagination.appendChild(prev);
+            }
+
+            // الأرقام
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement("button");
+                btn.innerText = i;
+                btn.className = "btn mx-1 " + (i === currentPage ? "btn-primary" : "btn-outline-primary");
+                btn.onclick = () => showPage(i);
+                pagination.appendChild(btn);
+            }
+
+            // زر Next
+            if (currentPage < totalPages) {
+                const next = document.createElement("button");
+                next.innerText = "Next";
+                next.className = "btn btn-outline-primary mx-1";
+                next.onclick = () => showPage(currentPage + 1);
+                pagination.appendChild(next);
+            }
+        }
+
+        // أول صفحة
+        showPage(1);
+    });
+</script>
+

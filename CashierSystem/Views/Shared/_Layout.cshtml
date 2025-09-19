@@ -49,11 +49,13 @@
             @await Html.PartialAsync("_Login")
         </nav>
     </header>
-    <div  class="container bg-transparent card">
-        <div class="card-body bg-light-subtle">
-            <main role="main" class="pb-3">
-                @RenderBody()
-            </main>
+    <div  class="container bg-transparent">
+        <div class="card">
+            <div class="card-body bg-light-subtle">
+                <main role="main" class="pb-3">
+                    @RenderBody()
+                </main>
+            </div>
         </div>
     </div>
 

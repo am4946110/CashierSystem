@@ -85,7 +85,7 @@ namespace CashierSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("TransactionId,ProductId,Quantity,TransactionType,TransactionDate,Reference")] StockTransaction stockTransaction)
+        public async Task<IActionResult> Create([Bind("ProductId,Quantity,TransactionType,TransactionDate,Reference")] StockTransaction stockTransaction)
         {
             if (!ModelState.IsValid)
             {

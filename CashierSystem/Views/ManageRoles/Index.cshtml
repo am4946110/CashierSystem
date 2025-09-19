@@ -1,40 +1,56 @@
-﻿@model  IEnumerable<CashierSystem.Models.VwCurrentStock>
+﻿@model IEnumerable<MyRole>
 @{
-    ViewData["Title"] = "Current Stock";
+    ViewData["Title"] = "Index";
 }
 
-<h1 class="text-center pb-3">Current Stock</h1>
+<h1 class="text-center mt-3  pb-3">Roles</h1>
 
+
+<p class="pb-3">
+    <a class="btn btn-outline-primary" asp-action="Create">Create New</a>
+</p>
 
 <div class="table-responsive">
-    <table class="table align-middle">
-        <thead class="table-warning">
+    <table id="tableId" class="table pb-3 text-center table-hover  align-middle">
+        <thead class="table-dark">
             <tr>
-                <th>@Html.DisplayNameFor(model => model.ProductName)</th>
-                <th>@Html.DisplayNameFor(model => model.Barcode)</th>
-                <th>@Html.DisplayNameFor(model => model.CategoryName)</th>
-                <th>@Html.DisplayNameFor(model => model.SupplierName)</th>
-                <th>@Html.DisplayNameFor(model => model.CurrentStock)</th>
-                <th>@Html.DisplayNameFor(model => model.ReorderLevel)</th>
-                <th>Details</th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Name)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.NormalizedName)
+                </th>
+                @if (User.IsInRole("Admin"))
+                {
+                    <th>Edit</th>
+                }
             </tr>
         </thead>
         <tbody>
-            @foreach(var item in Model)
+            @foreach (var item in Model)
             {
                 <tr>
-                    <td>@Html.DisplayFor(modelItem => item.ProductName)</td>
-                    <td>@Html.DisplayFor(modelItem => item.Barcode)</td>
-                    <td>@Html.DisplayFor(modelItem => item.CategoryName)</td>
-                    <td>@Html.DisplayFor(modelItem => item.SupplierName)</td>
-                    <td>@Html.DisplayFor(modelItem => item.CurrentStock)</td>
-                    <td>@Html.DisplayFor(modelItem => item.ReorderLevel)</td>
-                    <td><a class="btn btn-info" asp-action="Details" asp-route-id="@item.Id">Details</a></td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.NormalizedName)
+                    </td>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <td>
+                            <a class="btn btn-outline-primary" asp-action="Edit" asp-route-id="@item.EncryptedId">Edit</a>
+                        </td>
+                    }
+
                 </tr>
             }
         </tbody>
     </table>
 </div>
+
+
+
 <div id="pagination" class="d-flex justify-content-center mt-3"></div>
 
 <script>
@@ -93,4 +109,3 @@
         showPage(1);
     });
 </script>
-
